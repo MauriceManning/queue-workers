@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:jms="http://www.springframework.org/schema/integration/jms"
+       xmlns:int="http://www.springframework.org/schema/integration"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context.xsd
+           http://www.springframework.org/schema/aop
+           http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+           http://www.springframework.org/schema/integration
+           http://www.springframework.org/schema/integration/spring-integration.xsd
+           http://www.springframework.org/schema/integration/jms
+           http://www.springframework.org/schema/integration/jms/spring-integration-jms-2.2.xsd">
+
+    <context:component-scan base-package="edu.berkeley.path.queue_workers" />
+    <import resource="classpath:aop-config.xml"/>
+    <import resource="classpath:model-orm-config.xml"/>
+    <import resource="classpath*:datasource-*-config.xml"/>
+
+    <bean id="persistWorker" class="edu.berkeley.path.queue_workers.workers.PersistWorker"></bean>
+
+    <int:channel id="scenarioChannel"/>
+    <int:channel id="scenarioCreatedChannel"/>
+
+    <int:service-activator input-channel="scenarioChannel"  output-channel="scenarioCreatedChannel" ref="persistWorker" method="persistScenario"/>
+
+    <!-- ***   pub-sub-domain  True = Topic, False = Queue   ***  -->
+    <jms:message-driven-channel-adapter channel="scenarioChannel"
+                                        extract-payload="true"
+                                        connection-factory="connectionFactory"
+                                        destination-name="scenarioPublish"
+                                        pub-sub-domain="false"/>
+
+
+    <!-- ***   bridge the output channel to a queue channel so we can retrieve the output message after the test executes and verify   ***  -->
+    <int:bridge input-channel="scenarioCreatedChannel"
+            output-channel="testChannel"/>
+
+    <int:channel id="testChannel">
+        <int:queue/>
+    </int:channel>
+
+
+    <!-- <int:poller default="true" fixed-delay="1000" id="poller"/>  -->
+
+</beans>
