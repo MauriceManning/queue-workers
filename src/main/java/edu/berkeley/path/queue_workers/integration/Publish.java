@@ -41,7 +41,7 @@ public class Publish {
 
         try {
 
-            jmsStatusTemplate.convertAndSend("StatusTopic", map, new MessagePostProcessor() {
+            jmsStatusTemplate.convertAndSend("Status", map, new MessagePostProcessor() {
                 public Message postProcessMessage(Message message) throws JMSException {
                     message.setStringProperty("RequestId", RequestIdFinal  );
                     message.setStringProperty("Type", TypeFinal  );
