@@ -12,13 +12,21 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.integration.Message;
+import org.springframework.integration.channel.QueueChannel;
 import org.springframework.jms.core.JmsTemplate;
+import org.springframework.jms.core.MessagePostProcessor;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import javax.jms.JMSException;
 import java.sql.Connection;
+import java.util.HashMap;
+import java.util.Map;
 
 import static junit.framework.Assert.fail;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  *
@@ -39,6 +47,9 @@ public class FullScenarioPersistTest {
     private JmsTemplate jmsTemplate;
     public void setJmsTemplate(JmsTemplate jt) { this.jmsTemplate = jt; }
 
+    @Autowired
+    QueueChannel testChannel;
+
     @Before
     public void setUp() throws Exception {
 
@@ -47,10 +58,6 @@ public class FullScenarioPersistTest {
         connection = oraDatabase.doConnect();
         scenarioWriter = new ScenarioWriter(connection);
         scenarioReader = new ScenarioReader(connection);
-
-//        // create a simple scenario
-//        scenario = new Scenario();
-//        scenario.setName("testScenario");
 
     }
 
@@ -61,7 +68,7 @@ public class FullScenarioPersistTest {
 
 
     @Test
-    //@Ignore
+    @Ignore
     public void testScenarioPublish() {
         try {
 
@@ -77,20 +84,44 @@ public class FullScenarioPersistTest {
                 edu.berkeley.path.model_objects.util.Serializer serializer = new edu.berkeley.path.model_objects.util.Serializer();
                 String xmlScenario = serializer.objectToXml(bigScenario);
 
-                //for (int i=0; i < 3; i++) {
-                jmsTemplate.convertAndSend(xmlScenario);
+
+                final String RequestIdFinal = "r001";
+                final String TypeFinal = "persist";
+
+                Map map = new HashMap();
+                map.put( "RequestId", RequestIdFinal);
+                map.put( "Scenario", xmlScenario);
+
+                jmsTemplate.convertAndSend("PersistRequest", map, new MessagePostProcessor() {
+                    public javax.jms.Message postProcessMessage(javax.jms.Message message) throws JMSException {
+                        message.setStringProperty("RequestId", RequestIdFinal  );
+                        message.setStringProperty("Type", TypeFinal  );
+                        return message;
+                    }
+                });
+
+
+                // now catch the id of the inserted scenario
+                Message<?> message =  testChannel.receive(5000);
+                assertNotNull("Expected a scenario id in the response", message);
+
+                //retrieve the scenario id from the payload then delete to clean up
+                Long scenarioId = (Long) message.getPayload();
+                assertNotEquals(scenarioId.longValue(), 0L);
+                logger.info("ScenarioPublishTest clean up scenario. Id: " + scenarioId);
+                scenario = scenarioReader.readRow(scenarioId);
+                scenarioWriter.deleteRow(scenario);
 
 
             } catch (Exception e) {
                 e.printStackTrace();
-                // assert fails if exception is thrown
+
             }
 
         } catch (Exception ex) {
             logger.info("ScenarioPublishTest publish  Exception ex:" + ex.getMessage());
             logger.info("ScenarioPublishTest publish  Exception2 ex:" + ex);
 
-            // assert fails if exception is thrown
         }
 
     }

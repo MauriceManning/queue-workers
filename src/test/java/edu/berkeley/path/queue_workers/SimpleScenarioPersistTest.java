@@ -15,10 +15,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.integration.Message;
 import org.springframework.integration.channel.QueueChannel;
 import org.springframework.jms.core.JmsTemplate;
+import org.springframework.jms.core.MessagePostProcessor;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import javax.jms.JMSException;
 import java.sql.Connection;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
@@ -28,7 +32,7 @@ import static org.junit.Assert.assertNotNull;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"classpath:queue-workers-config.xml"})
-public class ScenarioPersistDevTest {
+public class SimpleScenarioPersistTest {
 
     private Logger logger = null;
     private static Connection connection;
@@ -93,7 +97,20 @@ public class ScenarioPersistDevTest {
                 edu.berkeley.path.model_objects.util.Serializer serializer = new edu.berkeley.path.model_objects.util.Serializer();
                 String xmlScenario = serializer.objectToXml(scenario);
 
-                jmsTemplate.convertAndSend("scenarioPublish", xmlScenario);
+                final String RequestIdFinal = "r001";
+                final String TypeFinal = "persist";
+
+                Map map = new HashMap();
+                map.put( "RequestId", RequestIdFinal);
+                map.put( "Scenario", xmlScenario);
+
+                jmsTemplate.convertAndSend("PersistRequest", map, new MessagePostProcessor() {
+                    public javax.jms.Message postProcessMessage(javax.jms.Message message) throws JMSException {
+                        message.setStringProperty("RequestId", RequestIdFinal  );
+                        message.setStringProperty("Type", TypeFinal  );
+                        return message;
+                    }
+                });
 
                 // now catch the id of the inserted scenario
                 Message<?>  message =  testChannel.receive(2000);
@@ -109,18 +126,16 @@ public class ScenarioPersistDevTest {
 
             } catch (Exception e) {
                 e.printStackTrace();
-                // assert fails if exception is thrown
+
             }
 
         } catch (Exception ex) {
             logger.info("ScenarioPublishTest publish  Exception ex:" + ex.getMessage());
             ex.printStackTrace();
 
-            // assert fails if exception is thrown
+
         }
     }
 
-
-    public void onMessage(javax.jms.Message message) { logger.info("onMessage:  update received" ); }
 
 }

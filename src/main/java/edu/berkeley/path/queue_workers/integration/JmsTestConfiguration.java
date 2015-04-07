@@ -24,7 +24,6 @@ public class JmsTestConfiguration {
         ActiveMQConnectionFactory activeMQConnectionFactory =
                 new ActiveMQConnectionFactory();
         activeMQConnectionFactory.setUseCompression(true);
-        activeMQConnectionFactory.setRedeliveryPolicy(redeliveryPolicy());
 
         //Dev ActiveMQ server on via-pn2.path.berkeley.edu
         activeMQConnectionFactory.setBrokerURL("tcp://169.229.249.10:61616");
@@ -38,20 +37,21 @@ public class JmsTestConfiguration {
         return connectionFactory;
     }
 
-    //todo: refine this policy
+
     @Bean
-    public RedeliveryPolicy redeliveryPolicy() {
-        RedeliveryPolicy redeliveryPolicy = new RedeliveryPolicy();
-        redeliveryPolicy.setInitialRedeliveryDelay(10000);
-        redeliveryPolicy.setMaximumRedeliveries(5);
-        redeliveryPolicy.setUseExponentialBackOff(true);
-        redeliveryPolicy.setBackOffMultiplier(2);
-        return redeliveryPolicy;
+    public JmsTemplate jmsStatusTemplate() {
+        JmsTemplate jmsTemplate = new JmsTemplate();
+        jmsTemplate.setConnectionFactory(connectionFactory());
+        jmsTemplate.setDefaultDestinationName("Status");
+        // ***  True = Topic, False = Queue   ***
+        jmsTemplate.setPubSubDomain(true);
+        return jmsTemplate;
     }
+
 
     @Bean
     public Queue requestsQueue() {
-        return new ActiveMQQueue("scenarioComplete");
+        return new ActiveMQQueue("PersistRequest");
     }
 
     @Bean

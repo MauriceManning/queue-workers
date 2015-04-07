@@ -11,25 +11,24 @@ import org.springframework.jms.core.JmsTemplate;
 import javax.jms.ConnectionFactory;
 import javax.jms.Queue;
 
+
 /**
  * Contains the configuration information for JMS integration.
  */
-
 @Configuration
-@Profile("dev")
-public class JmsDevConfiguration {
+@Profile("aws")
+public class JmsAwsConfiguration {
 
     @Bean
     public ConnectionFactory connectionFactory() {
         ActiveMQConnectionFactory activeMQConnectionFactory =
                 new ActiveMQConnectionFactory();
+        activeMQConnectionFactory.setUseCompression(true);
+        //activeMQConnectionFactory.setRedeliveryPolicy(redeliveryPolicy());
 
-        // local install of ActiveMQ for development testing
-        activeMQConnectionFactory.setBrokerURL("tcp://localhost:61616");
-        //activeMQConnectionFactory.setUseCompression(true);
-
-        //embedded ActiveMQ broker when one is not installed locally.
-        //activeMQConnectionFactory.setBrokerURL("vm://localhost");
+        //Dev ActiveMQ server on via-pn2.path.berkeley.edu
+        activeMQConnectionFactory.setBrokerURL("tcp://10.17.5.8:61616");
+        activeMQConnectionFactory.setUseCompression(true);
 
         CachingConnectionFactory connectionFactory =
                 new CachingConnectionFactory(activeMQConnectionFactory);
@@ -40,17 +39,11 @@ public class JmsDevConfiguration {
         return connectionFactory;
     }
 
-//    @Bean
-//    public Queue requestsQueue() {
-//        return new ActiveMQQueue("scenarioChannel");
-//    }
 
     @Bean
-    public JmsTemplate jmsTemplate() {
+    public JmsTemplate jmsTestTemplate() {
         JmsTemplate jmsTemplate = new JmsTemplate();
         jmsTemplate.setConnectionFactory(connectionFactory());
-        //jmsTemplate.setDefaultDestination(requestsQueue());
-        //jmsTemplate.setDefaultDestinationName("scenarioPublish");
         // ***  True = Topic, False = Queue   ***
         jmsTemplate.setPubSubDomain(false);
         return jmsTemplate;
@@ -65,6 +58,7 @@ public class JmsDevConfiguration {
         jmsTemplate.setPubSubDomain(true);
         return jmsTemplate;
     }
+
 
 
 }
