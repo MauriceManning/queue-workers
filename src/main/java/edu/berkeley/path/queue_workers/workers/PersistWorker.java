@@ -5,6 +5,7 @@ import edu.berkeley.path.model_database_access.scenario.ScenarioWriter;
 import edu.berkeley.path.model_objects.ModelObjectsFactory;
 import edu.berkeley.path.model_objects.shared.RunRequest;
 import edu.berkeley.path.queue_workers.integration.Publish;
+import edu.berkeley.path.queue_workers.processing.XMLScenarioImporter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,9 @@ public class PersistWorker {
     @Autowired
     private Publish publish;
 
+    @Autowired
+    private XMLScenarioImporter xmlImporter;
+
 
     public long persistScenario(HashMap message) {
 
@@ -46,9 +50,12 @@ public class PersistWorker {
             String requestTag = (String) message.get("RequestId");
             logger.debug("requestId : " + requestTag);
 
-            connection = oraDatabase.doConnect();
-            scenarioWriter = new ScenarioWriter(connection);
-            retval = scenarioWriter.insert(pScenario);
+            if (pScenario.getListOfNetworks().size() != 1 ) {
+                logger.error(" Scenario must have exactly one network. Sceanrio id: " + pScenario.getId());
+                return 0;
+            }
+
+            retval = xmlImporter.saveScenarioForNetwork(pScenario, pScenario.getListOfNetworks().get(0).getId());
             logger.info("ScenarioWorker handleMessage: insert scenario " + retval);
 
             HashMap map = new HashMap();
@@ -58,13 +65,10 @@ public class PersistWorker {
 
         } catch (Exception e) {
             e.printStackTrace();
-            // assert fails if exception is thrown
         }
 
         return retval;
 
     }
-
-
 
 }

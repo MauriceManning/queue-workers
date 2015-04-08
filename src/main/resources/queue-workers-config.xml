@@ -19,11 +19,16 @@
     <context:component-scan base-package="edu.berkeley.path.queue_workers" />
     <import resource="classpath:aop-config.xml"/>
     <import resource="classpath:model-orm-config.xml"/>
-    <import resource="classpath*:datasource-*-config.xml"/>
+    <import resource="classpath:datasource-dev-config.xml"/>
+    <import resource="classpath:datasource-test-config.xml"/>
+    <import resource="classpath:datasource-awsdev-config.xml"/>
 
     <bean id="persistWorker" class="edu.berkeley.path.queue_workers.workers.PersistWorker"></bean>
 
     <bean id="publish" class="edu.berkeley.path.queue_workers.integration.Publish">
+    </bean>
+
+    <bean id="xmlImporter" class="edu.berkeley.path.queue_workers.processing.XMLScenarioImporter">
     </bean>
 
     <int:channel id="scenarioChannel"/>
@@ -46,6 +51,5 @@
     <int:channel id="testChannel">
         <int:queue/>
     </int:channel>
-
 
 </beans>

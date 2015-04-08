@@ -3,6 +3,7 @@ package edu.berkeley.path.queue_workers;
 import core.oraDatabase;
 import edu.berkeley.path.model_database_access.scenario.ScenarioReader;
 import edu.berkeley.path.model_database_access.scenario.ScenarioWriter;
+import edu.berkeley.path.model_objects.network.Network;
 import edu.berkeley.path.model_objects.scenario.Scenario;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -21,7 +22,9 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import javax.jms.JMSException;
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertNotEquals;
@@ -77,6 +80,12 @@ public class SimpleScenarioPersistTest {
     public void testMiniScenarioPublish() {
         try {
 
+            Network network = new Network();
+            network.setId(5674L);
+            network.setName("foo");
+            List<Network> networkList = new ArrayList<Network>();
+            networkList.add(network);
+
             scenario = new Scenario();
             scenario.setProjectId(PROJECT_ID);
             scenario.setName(NAME);
@@ -89,6 +98,7 @@ public class SimpleScenarioPersistTest {
             scenario.setSplitRatioSetId(SET_ID);
             scenario.setLockedForEdit(LOCKED);
             scenario.setLockedForHistory(LOCKED);
+            scenario.setListOfNetworks(networkList);
 
             jmsTemplate.setReceiveTimeout(3000);
 
