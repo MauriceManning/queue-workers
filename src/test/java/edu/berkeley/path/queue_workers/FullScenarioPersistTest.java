@@ -84,7 +84,6 @@ public class FullScenarioPersistTest {
                 edu.berkeley.path.model_objects.util.Serializer serializer = new edu.berkeley.path.model_objects.util.Serializer();
                 String xmlScenario = serializer.objectToXml(bigScenario);
 
-
                 final String RequestIdFinal = "r001";
                 final String TypeFinal = "persist";
 
@@ -99,7 +98,6 @@ public class FullScenarioPersistTest {
                         return message;
                     }
                 });
-
 
                 // now catch the id of the inserted scenario
                 Message<?> message =  testChannel.receive(5000);
@@ -125,7 +123,5 @@ public class FullScenarioPersistTest {
         }
 
     }
-
-
 
 }

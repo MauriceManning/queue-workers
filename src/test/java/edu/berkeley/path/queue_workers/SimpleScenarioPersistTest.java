@@ -92,7 +92,6 @@ public class SimpleScenarioPersistTest {
 
             jmsTemplate.setReceiveTimeout(3000);
 
-
             try {
                 edu.berkeley.path.model_objects.util.Serializer serializer = new edu.berkeley.path.model_objects.util.Serializer();
                 String xmlScenario = serializer.objectToXml(scenario);
@@ -126,14 +125,11 @@ public class SimpleScenarioPersistTest {
 
             } catch (Exception e) {
                 e.printStackTrace();
-
             }
 
         } catch (Exception ex) {
             logger.info("ScenarioPublishTest publish  Exception ex:" + ex.getMessage());
             ex.printStackTrace();
-
-
         }
     }
 

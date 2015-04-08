@@ -48,6 +48,4 @@
     </int:channel>
 
 
-    <!-- <int:poller default="true" fixed-delay="1000" id="poller"/>  -->
-
 </beans>

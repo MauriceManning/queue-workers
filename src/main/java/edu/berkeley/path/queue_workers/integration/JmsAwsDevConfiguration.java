@@ -16,8 +16,8 @@ import javax.jms.Queue;
  * Contains the configuration information for JMS integration.
  */
 @Configuration
-@Profile("aws")
-public class JmsAwsConfiguration {
+@Profile("awsdev")
+public class JmsAwsDevConfiguration {
 
     @Bean
     public ConnectionFactory connectionFactory() {
