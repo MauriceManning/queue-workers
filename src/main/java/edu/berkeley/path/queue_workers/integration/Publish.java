@@ -25,15 +25,15 @@ public class Publish {
 
 
 
-    public void publishStatus(String requestId, String publisher, String type, String description, HashMap details) {
+    public void publishStatus(long taskId, String publisher, String type, String description, HashMap details) {
 
         final Logger logger = LogManager.getLogger(Publish.class.getName());
 
-        final String RequestIdFinal = requestId;
+        final long TaskIdFinal = taskId;
         final String TypeFinal = type;
 
         Map map = new HashMap();
-        map.put( "RequestId", requestId);
+        map.put( "RequestId", taskId);
         map.put( "Publisher", publisher);
         map.put( "Type", type);
         map.put( "Description", description);
@@ -43,15 +43,15 @@ public class Publish {
 
             jmsStatusTemplate.convertAndSend("Status", map, new MessagePostProcessor() {
                 public Message postProcessMessage(Message message) throws JMSException {
-                    message.setStringProperty("RequestId", RequestIdFinal  );
+                    message.setLongProperty("Task", TaskIdFinal  );
                     message.setStringProperty("Type", TypeFinal  );
                     return message;
                 }
             });
 
         } catch (Exception e) {
-            logger.trace("publishStatus RequestIdFinal " + RequestIdFinal);
-            logger.trace("publishStatus TypeFinal " + TypeFinal);
+            logger.trace("publishStatus RequestId " + TaskIdFinal);
+            logger.trace("publishStatus Type " + TypeFinal);
 
             e.printStackTrace();
         }

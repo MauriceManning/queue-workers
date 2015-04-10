@@ -47,8 +47,8 @@ public class PersistWorker {
             Scenario pScenario = serializer.xmlToObject(scenarioXML, Scenario.class, new ModelObjectsFactory() );
 
             //retrieve the request tag, currently an int but stored in a string
-            String requestTag = (String) message.get("RequestId");
-            logger.debug("requestId : " + requestTag);
+            long taskId =  ( (Long) message.get("TaskId")).longValue();
+            logger.debug("taskId : " + taskId);
 
             if (pScenario.getListOfNetworks().size() != 1 ) {
                 logger.error(" Scenario must have exactly one network. Sceanrio id: " + pScenario.getId());
@@ -61,7 +61,7 @@ public class PersistWorker {
             HashMap map = new HashMap();
             map.put( "Id", retval);
 
-            publish.publishStatus(requestTag, "PersistWorker", "Persisted",  "Scenario persisted into repository.", map);
+            publish.publishStatus(taskId, "PersistWorker", "Persisted",  "Scenario persisted into repository.", map);
 
         } catch (Exception e) {
             e.printStackTrace();
