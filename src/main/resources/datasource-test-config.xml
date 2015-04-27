@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans profile="test"  xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+		http://www.springframework.org/schema/tx
+		http://www.springframework.org/schema/tx/spring-tx-3.1.xsd ">
+
+    <!--  Must specify username and password as java system properties:    -->
+    <!--   -Dhibernate.connection.username=xxx -Dhibernate.connection.password=xxx    -->
+
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="oracle.jdbc.OracleDriver" />
+        <property name="url" value="jdbc:oracle:thin:@cctest.path.berkeley.edu:1521:viatest" />
+        <!--  for offsite testing:   -->
+        <!--<property name="url" value="jdbc:oracle:thin:@localhost:1521:viatest" />-->
+
+    </bean>
+
+    <bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+        <property name="dataSource" ref="dataSource" />
+        <property name="packagesToScan" value="edu.berkeley.path.model_orm" />
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.dialect">org.hibernate.dialect.Oracle10gDialect</prop>
+                <!-- <prop key="hibernate.hbm2ddl.auto">validate</prop>  -->
+                <prop key="hibernate.show_sql">true</prop>
+                <prop key="hibernate.default_schema">via</prop>
+                <prop key="format_sql">true</prop>
+                <prop key="use_sql_comments">true</prop>
+            </props>
+        </property>
+    </bean>
+
+    <bean id="transactionManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+
+    <!-- Register @Autowired annotation  -->
+    <bean class="org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor" />
+
+</beans>

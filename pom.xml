@@ -19,6 +19,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring.framework.version>4.1.1.RELEASE</spring.framework.version>
         <spring.integration.version>3.0.6.RELEASE</spring.integration.version>
+        <hibernate.version>4.3.8.Final</hibernate.version>
         <activemq.version>5.4.2</activemq.version>
         <log4j.version>2.1</log4j.version>
         <cglib.version>2.2</cglib.version>
@@ -73,6 +74,12 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-aspects</artifactId>
             <version>${spring.framework.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>${hibernate.version}</version>
         </dependency>
 
         <dependency>
